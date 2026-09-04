@@ -1,6 +1,8 @@
 ---
 name: forensic-investigation
 description: Use when an incident needs investigating — a breach, credential abuse, unexpected spend or traffic, suspicious activity, data exposure — and the user asks to investigate, establish what happened, collect evidence, or build a timeline. Use before any report is written.
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Forensic investigation
@@ -69,9 +71,10 @@ read `references/PROCESS.md`; sources are in `references/REFERENCES.md`.
 
 ## Hand off
 
-When collection and analysis are done, switch to the `forensic-report` skill
-to write and validate the package. Do not start writing findings before the
-evidence layer is hashed and catalogued.
+When collection and analysis are done, writing moves to the `forensic-report`
+skill. That skill starts only when a person runs it, so report that the
+evidence layer is hashed and catalogued and ask for `/forensic-report`. Do not
+start writing findings before that point.
 
 ## Handling
 

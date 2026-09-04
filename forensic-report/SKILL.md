@@ -1,6 +1,8 @@
 ---
 name: forensic-report
 description: Use when writing, assembling or validating a forensic report or report package — after evidence has been collected, when the user asks to write up an investigation, produce findings, review a draft report, or check a package before release.
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Forensic report — write and validate

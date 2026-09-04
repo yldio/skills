@@ -120,8 +120,9 @@ a glance which rows are records and which are inference.
 ## Step 5 — Write the report
 
 Fill the package's `REPORT.md`, `POSTMORTEM.md`, `INDICATORS.md`,
-`RECOMMENDATIONS.md`, `METHODOLOGY.md`. Use the `forensic-report` skill for
-the writing and validation rules. The short version:
+`RECOMMENDATIONS.md`, `METHODOLOGY.md`. The `forensic-report` skill carries the
+writing and validation rules; a person runs it with `/forensic-report`. The
+short version:
 
 1. One finding per claim (F-01, F-02, …), each with: `Source:` line, the data,
    the reasoning, alternatives considered, consequence, what would change it,
