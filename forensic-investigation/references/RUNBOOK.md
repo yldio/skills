@@ -131,7 +131,7 @@ short version:
    a layperson (SWGDE 18-Q-002 §5.4); mechanism detail goes under the plain
    statement, not instead of it.
 3. Unknowns are stated as unknown. Never fill a gap with a plausible guess.
-4. Write the Limitations section as load-bearing: scope, retention, sampling,
+4. The Limitations section is part of the proof, not boilerplate: scope, retention, sampling,
    attribution limits, hypotheses not excluded, deviations from procedure.
 5. The postmortem is blameless and cites no evidence; the report proves, the
    postmortem teaches.
