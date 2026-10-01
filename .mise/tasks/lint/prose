@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+#MISE description="Check the prose in every Markdown file with Vale and the YLD style"
+#
+# The YLD style comes from the yldio/vale-yld release below. The task
+# downloads it into .vale/styles, checks the SHA-256 pinned here and the
+# minisign signature against .vale/vale-yld.pub, then unpacks it.
+#
+# Vale fails on error-level alerts only. Warnings and suggestions show
+# in the output, but do not fail the task.
+#
+# In GitHub Actions, each alert is an annotation on its file and line.
+
+set -euo pipefail
+IFS=$'\n\t'
+
+readonly STYLE_VERSION=1.0.0
+readonly STYLE_SHA256=d8b63e291860b9320ac5b27f5b3ce11e849841995537fccf295ef68ae1b50080
+readonly STYLE_URL="https://github.com/yldio/vale-yld/releases/download/v${STYLE_VERSION}/YLD.zip"
+readonly STYLES_DIR=.vale/styles
+readonly PUBLIC_KEY=.vale/vale-yld.pub
+
+# Global, so that the EXIT trap can still read it after main returns.
+workdir=""
+
+cleanup() {
+  if [ -n "$workdir" ]; then
+    rm -rf "$workdir"
+  fi
+}
+
+# Install the pinned YLD style, unless that version is already there.
+install_style() {
+  local stamp="$STYLES_DIR/YLD/.version"
+  if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$STYLE_VERSION" ]; then
+    return
+  fi
+
+  workdir=$(mktemp -d)
+  curl -fsSL -o "$workdir/YLD.zip" "$STYLE_URL"
+  curl -fsSL -o "$workdir/YLD.zip.minisig" "$STYLE_URL.minisig"
+
+  printf '%s  %s\n' "$STYLE_SHA256" "$workdir/YLD.zip" | shasum -a 256 -c - > /dev/null
+  minisign -V -q -m "$workdir/YLD.zip" -p "$PUBLIC_KEY"
+
+  rm -rf "$STYLES_DIR/YLD"
+  mkdir -p "$STYLES_DIR"
+  unzip -q "$workdir/YLD.zip" -d "$STYLES_DIR"
+  printf '%s\n' "$STYLE_VERSION" > "$stamp"
+}
+
+# One annotation per alert. Paths and messages are escaped, so that
+# they cannot end a workflow command property or message.
+annotate() {
+  jq -r '
+    def msg: tostring | gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+    def prop: msg | gsub(":"; "%3A") | gsub(","; "%2C");
+    def kind: {"error": "error", "warning": "warning"}[.] // "notice";
+    to_entries[] | .key as $file | .value[]
+    | "::\(.Severity | kind) file=\($file | prop),line=\(.Line),col=\(.Span[0]),endColumn=\(.Span[1]),title=\(.Check | prop)::"
+      + (.Message | msg)
+  '
+}
+
+main() {
+  cd "$(git rev-parse --show-toplevel)"
+  workdir=""
+  trap cleanup EXIT
+
+  install_style
+
+  local files=() file
+  while read -r file; do
+    files+=("$file")
+  done < <(git ls-files '*.md')
+
+  if [ "${GITHUB_ACTIONS:-}" != true ]; then
+    vale "${files[@]}"
+    return
+  fi
+
+  local status=0 report
+  report=$(vale --output=JSON "${files[@]}") || status=$?
+  annotate <<< "$report"
+  return "$status"
+}
+
+main "$@"

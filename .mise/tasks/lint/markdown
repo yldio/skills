@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#MISE description="Check the Markdown structure of every Markdown file with rumdl"
+#USAGE flag "--fix" help="Fix what rumdl can fix, then report the rest"
+#
+# .rumdl.toml lists the rules that are off, and why.
+#
+# In GitHub Actions, each finding is an annotation on its file and line.
+
+set -euo pipefail
+IFS=$'\n\t'
+
+main() {
+  cd "$(git rev-parse --show-toplevel)"
+
+  if [ "${usage_fix:-false}" = true ]; then
+    rumdl fmt .
+  fi
+
+  local format=text
+  if [ "${GITHUB_ACTIONS:-}" = true ]; then
+    format=github
+  fi
+
+  rumdl check --output-format "$format" .
+}
+
+main "$@"
