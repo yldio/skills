@@ -96,8 +96,8 @@ Used throughout the package. Every finding carries one of these labels.
 
 ## 7. Limitations — what this examination cannot support
 
-These are load-bearing. Any conclusion beyond them is not carried by this
-evidence.
+These limits bound every conclusion above. Any conclusion beyond them is not
+carried by this evidence.
 
 1. **<Scope boundary.>** <e.g. single account examined; adjacent accounts not examined.>
 2. **<Attribution limit.>** <e.g. source identity behind credential X not established.>
