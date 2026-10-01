@@ -1,0 +1,14 @@
+# Bundled-file paths that lint:skills must not check, one per line,
+# relative to the repository root.
+
+# A script that the investigator writes for each case.
+plugins/yld-engineering/skills/forensic-investigation/scripts/collect.sh
+
+# The template lives in the forensic-investigation skill.
+plugins/yld-engineering/skills/forensic-report/assets/template/
+
+# TODO: missing files. Remove each entry when its owners add the file.
+# forensic-report has validation.md, and the two RUNBOOK.md are identical.
+plugins/yld-engineering/skills/forensic-investigation/references/validation.md
+# The skill folder has only SKILL.md.
+plugins/yld-design/skills/design-component-documentation/references/REFERENCE.md

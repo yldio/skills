@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+#MISE description="Validate the marketplace, the plugins and their skills"
+#
+# Three checks:
+#   1. claude plugin validate --strict on the marketplace, on each
+#      plugin manifest and on each plugin's skills directory.
+#   2. Each skill name is lowercase letters, digits and hyphens, is at
+#      most 64 characters, and matches its directory name.
+#   3. Each bundled-file path that a skill names in inline code, such as
+#      `references/RUNBOOK.md`, exists in that skill's directory. Paths
+#      with a "*" are skipped. .skill-paths-allow lists the paths that
+#      name a file the skill creates, or a file in another skill.
+#
+# In GitHub Actions, each finding of checks 2 and 3 is an annotation.
+
+set -euo pipefail
+IFS=$'\n\t'
+
+readonly ALLOW_FILE=.skill-paths-allow
+readonly NAME_PATTERN='^[a-z0-9]+(-[a-z0-9]+)*$'
+
+failures=0
+
+# Escape a workflow command message.
+escape_data() {
+  local value=${1//%/%25}
+  value=${value//$'\r'/%0D}
+  printf '%s' "${value//$'\n'/%0A}"
+}
+
+# Escape a workflow command property. It also cannot contain : or ,.
+escape_property() {
+  local value
+  value=$(escape_data "$1")
+  value=${value//:/%3A}
+  printf '%s' "${value//,/%2C}"
+}
+
+# Print one finding, as an annotation in GitHub Actions. Names and paths
+# come from the pull request, so they are escaped.
+report() {
+  local file=$1 line=$2 message=$3
+  failures=$((failures + 1))
+  if [ "${GITHUB_ACTIONS:-}" = true ]; then
+    echo "::error file=$(escape_property "$file"),line=${line},title=Skill check::$(escape_data "$message")"
+  else
+    echo "${file}:${line}: ${message}"
+  fi
+}
+
+validate_manifests() {
+  local plugin
+  claude plugin validate --strict .
+  for plugin in plugins/*/; do
+    claude plugin validate --strict "$plugin"
+    if [ -d "${plugin}skills" ]; then
+      claude plugin validate --strict "${plugin}skills"
+    fi
+  done
+}
+
+# Print the name field from the frontmatter of a SKILL.md, with its line.
+frontmatter_name() {
+  awk '
+    NR == 1 && $0 != "---" { exit }
+    NR > 1 && $0 == "---" { exit }
+    /^name:/ { sub(/^name:[ \t]*/, ""); gsub(/["\047]/, ""); print NR "\t" $0; exit }
+  ' "$1"
+}
+
+check_names() {
+  local skill_md dir entry line name
+  while read -r skill_md; do
+    dir=$(basename "$(dirname "$skill_md")")
+    entry=$(frontmatter_name "$skill_md")
+    if [ -z "$entry" ]; then
+      report "$skill_md" 1 "The frontmatter has no name."
+      continue
+    fi
+    line=${entry%%$'\t'*}
+    name=${entry#*$'\t'}
+    if ! [[ $name =~ $NAME_PATTERN ]] || [ "${#name}" -gt 64 ]; then
+      report "$skill_md" "$line" "The name '${name}' must be lowercase letters, digits and hyphens, at most 64 characters."
+    fi
+    if [ "$name" != "$dir" ]; then
+      report "$skill_md" "$line" "The name '${name}' does not match the directory name '${dir}'."
+    fi
+  done < <(git ls-files 'plugins/*/skills/*/SKILL.md')
+}
+
+# True if the allow file lists this skill-relative path.
+allowed() {
+  [ -f "$ALLOW_FILE" ] && grep -qxF -- "$1" <(grep -v -E '^(#|$)' "$ALLOW_FILE")
+}
+
+# The backticks in the grep pattern are literal: it matches inline code.
+# shellcheck disable=SC2016
+check_paths() {
+  local skill_dir file match line path
+  while read -r skill_dir; do
+    while read -r match; do
+      file=${match%%:*}
+      match=${match#*:}
+      line=${match%%:*}
+      path=${match#*:}
+      path=${path//\`/}
+      case "$path" in
+        *'*'*) continue ;;
+      esac
+      if [ -e "${skill_dir}/${path}" ] || allowed "${skill_dir}/${path}"; then
+        continue
+      fi
+      report "$file" "$line" "The skill names '${path}', but ${skill_dir}/${path} does not exist."
+    done < <(grep -rnoE '`(references|assets|scripts)/[^` ]+`' "$skill_dir" || true)
+  done < <(git ls-files 'plugins/*/skills/*/SKILL.md' | xargs -n1 dirname)
+}
+
+main() {
+  cd "$(git rev-parse --show-toplevel)"
+
+  validate_manifests
+  check_names
+  check_paths
+
+  if [ "$failures" -gt 0 ]; then
+    echo "Skill checks failed: ${failures}." >&2
+    return 1
+  fi
+  echo "Skill checks passed."
+}
+
+main "$@"

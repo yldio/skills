@@ -1,0 +1,142 @@
+name: docs
+
+# Run only when Markdown, a plugin, the lint config or the tool versions
+# change.
+on:
+  pull_request:
+    paths:
+      - "**/*.md"
+      - plugins/**
+      - .claude-plugin/**
+      - .rumdl.toml
+      - .vale.ini
+      - .vale/**
+      - .skill-paths-allow
+      - .mise/tasks/lint/markdown
+      - .mise/tasks/lint/links
+      - .mise/tasks/lint/skills
+      - .mise/tasks/lint/prose
+      - mise.toml
+      - mise.lock
+      - .github/workflows/docs.yml
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - plugins/**
+      - .claude-plugin/**
+      - .rumdl.toml
+      - .vale.ini
+      - .vale/**
+      - .skill-paths-allow
+      - .mise/tasks/lint/markdown
+      - .mise/tasks/lint/links
+      - .mise/tasks/lint/skills
+      - .mise/tasks/lint/prose
+      - mise.toml
+      - mise.lock
+      - .github/workflows/docs.yml
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
+  # Install only the tools each job uses.
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+jobs:
+  markdown:
+    name: markdown
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install mise and rumdl
+        uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+        with:
+          version: 2026.9.18
+          # SHA-256 of the linux-x64 mise binary, from SHASUMS256.txt in the release.
+          sha256: d24fe0bf7e613824ad99f7b8dac3f2b381a37b9f75f84dd250855217095a8de4
+          install_args: aqua:rvben/rumdl
+
+      - name: Check Markdown structure
+        run: mise run lint:markdown
+
+  skills:
+    name: skills
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      DISABLE_AUTOUPDATER: "1"
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install mise and Claude Code
+        uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+        with:
+          version: 2026.9.18
+          # SHA-256 of the linux-x64 mise binary, from SHASUMS256.txt in the release.
+          sha256: d24fe0bf7e613824ad99f7b8dac3f2b381a37b9f75f84dd250855217095a8de4
+          install_args: aqua:anthropics/claude-code
+
+      - name: Validate plugins and skills
+        run: mise run lint:skills
+
+  links:
+    name: links
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install mise and lychee
+        uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+        with:
+          version: 2026.9.18
+          # SHA-256 of the linux-x64 mise binary, from SHASUMS256.txt in the release.
+          sha256: d24fe0bf7e613824ad99f7b8dac3f2b381a37b9f75f84dd250855217095a8de4
+          install_args: aqua:lycheeverse/lychee
+
+      - name: Check local links
+        run: mise run lint:links
+
+  prose:
+    name: prose
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install mise, Vale, minisign and jq
+        uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+        with:
+          version: 2026.9.18
+          # SHA-256 of the linux-x64 mise binary, from SHASUMS256.txt in the release.
+          sha256: d24fe0bf7e613824ad99f7b8dac3f2b381a37b9f75f84dd250855217095a8de4
+          install_args: aqua:vale-cli/vale aqua:jedisct1/minisign aqua:jqlang/jq
+
+      - name: Check prose with the YLD style
+        run: mise run lint:prose
