@@ -1,0 +1,20 @@
+# Markdown lint rules for the skills. The reader of a skill is a model,
+# so the rules that stay on are the ones that change how the Markdown
+# parses or renders. Style-only rules are off.
+
+[global]
+disable = [
+  # Line length. Skills mix wrapped and unwrapped prose, and a long
+  # line reads the same to a model.
+  "MD013",
+  # Inline HTML. Templates use placeholders such as <TICKET-ID> and
+  # <YYYY-MM-DD>, which parse as HTML tags.
+  "MD033",
+  # Bare URLs. Reference lists cite URLs as plain text.
+  "MD034",
+  # Emphasis as a heading. Templates use bold lines as labels.
+  "MD036",
+  # First line must be a heading. A SKILL.md starts with frontmatter,
+  # and not every file needs a title.
+  "MD041",
+]

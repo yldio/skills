@@ -2,9 +2,14 @@
 # mise.lock pins the checksum of each tool for each platform.
 
 [tools]
+"aqua:anthropics/claude-code" = "2.1.285"
+"aqua:jedisct1/minisign" = "0.12"
 "aqua:jqlang/jq" = "1.8.1"
 "aqua:koalaman/shellcheck" = "0.11.0"
+"aqua:lycheeverse/lychee" = "0.24.2"
+"aqua:rvben/rumdl" = "0.2.78"
 "aqua:trufflesecurity/trufflehog" = "3.97.9"
+"aqua:vale-cli/vale" = "3.23.0"
 "aqua:zizmorcore/zizmor" = "1.30.1"
 
 [settings]
