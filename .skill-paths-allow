@@ -1,14 +1,19 @@
 # Bundled-file paths that lint:skills must not check, one per line,
-# relative to the repository root.
+# relative to the repository root. Each skill has two paths: one in its
+# team plugin and one in its single-skill copy (mise run singles).
 
 # A script that the investigator writes for each case.
 plugins/yld-engineering/skills/forensic-investigation/scripts/collect.sh
+plugins/forensic-investigation/skills/forensic-investigation/scripts/collect.sh
 
 # The template lives in the forensic-investigation skill.
 plugins/yld-engineering/skills/forensic-report/assets/template/
+plugins/forensic-report/skills/forensic-report/assets/template/
 
 # TODO: missing files. Remove each entry when its owners add the file.
 # forensic-report has validation.md, and the two RUNBOOK.md are identical.
 plugins/yld-engineering/skills/forensic-investigation/references/validation.md
+plugins/forensic-investigation/skills/forensic-investigation/references/validation.md
 # The skill folder has only SKILL.md.
 plugins/yld-design/skills/component-documentation/references/REFERENCE.md
+plugins/component-documentation/skills/component-documentation/references/REFERENCE.md
