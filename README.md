@@ -20,7 +20,7 @@ Skills are grouped into one plugin per team, so a team's skills can be installed
 
 | Plugin | Team | Skills |
 |---|---|---|
-| `yld-engineering` | Engineering | `eli5`, `forensic-investigation`, `forensic-report`, `table-me`, `unslop`, `zoom-out` |
+| `yld-engineering` | Engineering | `eli5`, `forensic-investigation`, `forensic-report`, `jira-ticket`, `table-me`, `unslop`, `zoom-out` |
 | `yld-design` | Product Design | `compare-ds-components`, `component-documentation`, `ds-pr-review`, `eow-summary`, `interview-insights` |
 | `yld-marketing` | Marketing | `campaign-plan` |
 | `yld-cp` | Client Partners | `business-review-prep` |

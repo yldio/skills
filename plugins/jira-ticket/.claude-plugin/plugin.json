@@ -1,0 +1,7 @@
+{
+  "name": "jira-ticket",
+  "displayName": "/jira-ticket",
+  "description": "Writes a Jira ticket (bug, story, task or spike) that another engineer can pick up without asking the reporter anything.",
+  "version": "1.0.0",
+  "author": { "name": "YLD" }
+}

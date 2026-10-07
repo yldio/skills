@@ -21,6 +21,7 @@
     { "name": "interview-insights", "displayName": "/interview-insights", "source": "./plugins/interview-insights", "description": "Turns a client interview or discovery call transcript into a list of every problem and need raised, each attributed to the person who said it, with a second pass for anything missed and a list of unclear comments." },
     { "name": "campaign-plan", "displayName": "/campaign-plan", "source": "./plugins/campaign-plan", "description": "Turns event or campaign inputs (contract, brief, previous plan format, RACI) into a first-draft campaign plan for Notion with objectives, owners, budget and timeline." },
     { "name": "business-review-prep", "displayName": "/business-review-prep", "source": "./plugins/business-review-prep", "description": "Drafts the slide content for a client business review from our documentation, financials and team input, tailored to what the client values most." },
-    { "name": "skill-to-notion", "displayName": "/skill-to-notion", "source": "./plugins/skill-to-notion", "description": "Turns a workshop board (a task broken into six blocks, pasted as rough text from Miro) into a finished SKILL.md and a matching Notion skill page in the YLD format." }
+    { "name": "skill-to-notion", "displayName": "/skill-to-notion", "source": "./plugins/skill-to-notion", "description": "Turns a workshop board (a task broken into six blocks, pasted as rough text from Miro) into a finished SKILL.md and a matching Notion skill page in the YLD format." },
+    { "name": "jira-ticket", "displayName": "/jira-ticket", "source": "./plugins/jira-ticket", "description": "Writes a Jira ticket (bug, story, task or spike) that another engineer can pick up without asking the reporter anything." }
   ]
 }
